@@ -73,24 +73,57 @@ class Minesweeper:
                         self.reveal(nx, ny)  # recursively reveal surrounding cells
         return True  # return True if no mine was hit
 
-    # Method to start the gameplay loop
+    # Method to check if all non-mine cells are revealed (i.e., player wins)
+    def check_win(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                # If there are still unrevealed non-mine cells, return False
+                if not self.revealed[y][x] and (y * self.width + x) not in self.mines:
+                    return False
+        return True  # return True if all non-mine cells are revealed
+
     def play(self):
         while True:
             self.print_board()  # print the current state of the board
             try:
-                # Ask the player to enter coordinates
-                x = int(input("Enter x coordinate: "))
-                y = int(input("Enter y coordinate: "))
-                
+                # Ask the player to enter both coordinates, separated by a space
+                coords = input("Enter x and y coordinates (separated by space): ")
+                x, y = map(int, coords.split())  # split input and convert to integers
+
                 # If a mine is revealed, the game ends
                 if not self.reveal(x, y):
                     self.print_board(reveal=True)  # reveal all cells
                     print("Game Over! You hit a mine.")  # end message
+                    self.find_safe_cells()  # Display remaining safe cells after game over
+                    break  # exit the game loop
+
+                # Check if the player has won the game
+                if self.check_win():
+                    self.print_board(reveal=True)  # reveal all cells
+                    print("Congratulations! You have won the game.")  # win message
+                    self.find_safe_cells()  # Display remaining safe cells after winning
                     break  # exit the game loop
 
             # Handle invalid input
             except ValueError:
-                print("Invalid input. Please enter numbers only.")
+                print("Invalid input. Please enter two numbers separated by a space.")
+
+    # Method to find and print the coordinates of remaining safe cells
+    def find_safe_cells(self):
+        safe_cells = []
+        # Loop through all cells on the board
+        for y in range(self.height):
+            for x in range(self.width):
+                # If the cell is not revealed and it's not a mine
+                if not self.revealed[y][x] and (y * self.width + x) not in self.mines:
+                    safe_cells.append((x, y))  # Append the safe cell coordinates
+
+        # Print all the remaining safe cells
+        if safe_cells:
+            print("Remaining safe cells: ", safe_cells)
+        else:
+            print("No remaining safe cells, or all are revealed!")
+
 
 # Run the game if this file is executed as a script
 if __name__ == "__main__":
